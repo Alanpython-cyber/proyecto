@@ -1,0 +1,130 @@
+import discord
+from discord.ext import commands
+import random
+
+# Intents para poder leer mensajes
+intents = discord.Intents.default()
+intents.message_content = True
+
+
+bot = commands.Bot(command_prefix='$', intents=intents)
+
+eco_tips = [
+    "Reduce el uso de plásticos de un solo uso.",
+    "Recicla papel, vidrio, plástico y metales.",
+    "Camina o usa bicicleta en lugar del carro.",
+    "Ahorra energía apagando luces innecesarias.",
+    "Planta un árbol para mejorar la calidad del aire."
+]
+
+pollution_causes = [
+    "Quema de combustibles fósiles.",
+    "Uso excesivo de vehículos.",
+    "Fábricas que emiten gases tóxicos.",
+    "Deforestación masiva.",
+    "Manejo inadecuado de residuos."
+]
+
+eco_facts = [
+    "♻️ El reciclaje de una lata de aluminio ahorra energía para 3 horas de TV.",
+    "🌳 Un árbol adulto puede absorber hasta 21 kg de CO₂ al año.",
+    "🚿 Ahorrar agua también ayuda a reducir el uso de energía.",
+    "🔥 La contaminación del aire mata a más de 7 millones de personas cada año.",
+    "🐢 Más de 100,000 animales marinos mueren al año por plásticos."
+]
+
+recycling_tips = {
+    "papel": "📄 Quita grapas y clips antes de reciclar papel.",
+    "plástico": "🧴 Enjuaga los envases plásticos antes de reciclarlos.",
+    "vidrio": "🍾 No mezcles vidrio roto con vidrio entero.",
+    "metal": "🥫 Latas de aluminio y acero pueden reciclarse si están limpias.",
+    "ropa": "👕 Dona o reutiliza ropa en lugar de tirarla."
+}
+
+actions = [
+    "💧 Cierra el grifo mientras te cepillas los dientes.",
+    "🌞 Usa luz natural durante el día.",
+    "🛍️ Lleva tus propias bolsas al supermercado.",
+    "🔌 Desconecta cargadores que no estés usando.",
+    "🌿 Planta una planta en casa o escuela."
+]
+
+@bot.event
+async def on_ready():
+    print(f"✅ Bot conectado como {bot.user}")
+
+@bot.command()
+async def start(ctx):
+    await ctx.send("🌱 ¡Hola! Soy un bot ecológico. Usa `/help` para ver los comandos disponibles.")
+
+@bot.command()
+async def tip(ctx):
+    await ctx.send(f"💡 Tip ecológico: {random.choice(eco_tips)}")
+
+@bot.command()
+async def causes(ctx):
+    await ctx.send("🌍 Causas de la contaminación:\n- " + "\n- ".join(pollution_causes))
+
+@bot.command()
+async def facts(ctx):
+    await ctx.send(random.choice(eco_facts))
+
+@bot.command()
+async def recycle(ctx, material: str = None):
+    if not material:
+        await ctx.send("♻️ Usa `/recycle [material]` (papel, plástico, vidrio, metal, ropa).")
+        return
+    tip = recycling_tips.get(material.lower())
+    if tip:
+        await ctx.send(tip)
+    else:
+        await ctx.send("❌ Material no válido. Por favor usa: papel, plástico,")
+
+@bot.command()
+async def actions(ctx):
+    await ctx.send(f"🌎 Acción ecológica: {random.choice(actions)}")
+
+@bot.command()
+async def quiz(ctx):
+    questions = [
+        {
+            "q": "¿Qué tarda más en degradarse?",
+            "options": ["A) Papel", "B) Vidrio", "C) Plástico", "D) Fruta"],
+            "answer": "B"
+        },
+        {
+            "q": "¿Cómo ahorrar energía?",
+            "options": ["A) Usar LED", "B) Luces prendidas", "C) Gasolina", "D) Comprar ropa nueva"],
+            "answer": "A"
+        }
+    ]
+    q = random.choice(questions)
+    await ctx.send(f"📚 {q['q']}\n" + "\n".join(q['options']))
+
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel
+
+    try:
+        response = await bot.wait_for("message", timeout=20.0, check=check)
+        if response.content.upper() == q["answer"]:
+            await ctx.send("✅ ¡Correcto!")
+        else:
+            await ctx.send(f"❌ Incorrecto. La respuesta correcta era: **{q['answer']}**")
+    except:
+        await ctx.send("⏱️ Tiempo agotado. Intenta de nuevo.")
+
+@bot.command()
+async def ayuda (ctx):
+    await ctx.send(
+        "**📘 Comandos disponibles:**\n"
+        "/start - Presentación del bot\n"
+        "/tip - Consejo ecológico\n"
+        "/causes - Causas de contaminación\n"
+        "/facts - Dato curioso\n"
+        "/recycle [material] - Consejo para reciclar\n"
+        "/actions - Acción ecológica\n"
+        "/quiz - Pregunta de opción múltiple\n"
+        "/help - Muestra esta ayuda"
+    )
+
+bot.run("")
